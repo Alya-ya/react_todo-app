@@ -122,21 +122,24 @@ export const App: React.FC = () => {
                 key={todo.id}
                 className={todo.completed ? 'todo completed' : 'todo'}
               >
-                <input
-                  data-cy="TodoStatus"
-                  type="checkbox"
-                  className="todo__status"
-                  checked={todo.completed}
-                  onChange={() => {
-                    setTodos(
-                      todos.map(todoItem =>
-                        todoItem.id === todo.id
-                          ? { ...todoItem, completed: !todoItem.completed }
-                          : todoItem,
-                      ),
-                    );
-                  }}
-                />
+                {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                <label className="todo__status-label">
+                  <input
+                    data-cy="TodoStatus"
+                    type="checkbox"
+                    className="todo__status"
+                    checked={todo.completed}
+                    onChange={() => {
+                      setTodos(
+                        todos.map(todoItem =>
+                          todoItem.id === todo.id
+                            ? { ...todoItem, completed: !todoItem.completed }
+                            : todoItem,
+                        ),
+                      );
+                    }}
+                  />
+                </label>
 
                 {editingTodoId === todo.id ? (
                   <form
