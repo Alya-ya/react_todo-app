@@ -37,7 +37,16 @@ export const App: React.FC = () => {
     return null;
   }
 
-  const { todos, setTodos } = context;
+  const {
+    todos,
+    clearCompleted,
+    toggleTodo,
+    deleteTodo,
+    toggleAll,
+    addTodo,
+    updateTodoTitle,
+  } = context;
+
   const visibleTodos = {
     all: todos,
     active: todos.filter(todo => !todo.completed),
@@ -48,14 +57,10 @@ export const App: React.FC = () => {
     const trimmedTitle = redact.trim();
 
     if (!trimmedTitle) {
-      setTodos(todos.filter(todoItem => todoItem.id !== id));
+      deleteTodo(id);
       inputRef.current?.focus();
     } else {
-      setTodos(
-        todos.map(todoItem =>
-          todoItem.id === id ? { ...todoItem, title: trimmedTitle } : todoItem,
-        ),
-      );
+      updateTodoTitle(id, trimmedTitle);
     }
 
     setEditingTodoId(null);
@@ -75,14 +80,7 @@ export const App: React.FC = () => {
                   ? 'todoapp__toggle-all active'
                   : 'todoapp__toggle-all'
               }
-              onClick={() => {
-                setTodos(
-                  todos.map(todo => ({
-                    ...todo,
-                    completed: !todos.every(todoItem => todoItem.completed),
-                  })),
-                );
-              }}
+              onClick={toggleAll}
               data-cy="ToggleAllButton"
             />
           )}
@@ -90,13 +88,8 @@ export const App: React.FC = () => {
           <form
             onSubmit={event => {
               event.preventDefault();
-              const todo = {
-                id: `${newTodo}  ${new Date()}`,
-                title: newTodo.trim(),
-                completed: false,
-              };
 
-              setTodos([...todos, todo]);
+              addTodo(newTodo);
               setNewTodo('');
             }}
           >
@@ -130,13 +123,7 @@ export const App: React.FC = () => {
                     className="todo__status"
                     checked={todo.completed}
                     onChange={() => {
-                      setTodos(
-                        todos.map(todoItem =>
-                          todoItem.id === todo.id
-                            ? { ...todoItem, completed: !todoItem.completed }
-                            : todoItem,
-                        ),
-                      );
+                      toggleTodo(todo.id);
                     }}
                   />
                 </label>
@@ -185,9 +172,7 @@ export const App: React.FC = () => {
                     className="todo__remove"
                     data-cy="TodoDelete"
                     onClick={() => {
-                      setTodos(
-                        todos.filter(todoItem => todoItem.id !== todo.id),
-                      );
+                      deleteTodo(todo.id);
                       inputRef.current?.focus();
                     }}
                   >
@@ -246,7 +231,7 @@ export const App: React.FC = () => {
               data-cy="ClearCompletedButton"
               disabled={todos.filter(todo => todo.completed).length === 0}
               onClick={() => {
-                setTodos(todos.filter(todo => !todo.completed));
+                clearCompleted();
                 inputRef.current?.focus();
               }}
             >
