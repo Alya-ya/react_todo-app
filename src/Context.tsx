@@ -6,7 +6,7 @@ import React, {
   useEffect,
 } from 'react';
 
-type Todo = {
+export type Todo = {
   id: string;
   title: string;
   completed: boolean;
@@ -66,6 +66,12 @@ export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const addTodo = (title: string) => {
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
+      return;
+    }
+
     const todo = {
       id: `${title}  ${new Date()}`,
       title: title.trim(),

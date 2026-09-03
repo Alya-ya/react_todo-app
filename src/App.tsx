@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { TodoContext } from './Context';
+import { TodoList } from './Components/TodoList';
+import { TodoFooter } from './Components/TodoFooter';
 
 export const App: React.FC = () => {
   const context = useContext(TodoContext);
@@ -66,6 +68,18 @@ export const App: React.FC = () => {
     setEditingTodoId(null);
   };
 
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    addTodo(newTodo);
+    setNewTodo('');
+  };
+
+  const handleEditSubmit = (event: React.FormEvent, id: string) => {
+    event.preventDefault();
+    handleSave(id);
+  };
+
   return (
     <div className="todoapp">
       <h1 className="todoapp__title">todos</h1>
@@ -85,14 +99,7 @@ export const App: React.FC = () => {
             />
           )}
 
-          <form
-            onSubmit={event => {
-              event.preventDefault();
-
-              addTodo(newTodo);
-              setNewTodo('');
-            }}
-          >
+          <form onSubmit={handleSubmit}>
             <input
               data-cy="NewTodoField"
               ref={inputRef}
@@ -107,137 +114,30 @@ export const App: React.FC = () => {
           </form>
         </header>
 
-        {todos.length > 0 && (
-          <section className="todoapp__main" data-cy="TodoList">
-            {visibleTodos[filter].map(todo => (
-              <div
-                data-cy="Todo"
-                key={todo.id}
-                className={todo.completed ? 'todo completed' : 'todo'}
-              >
-                {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-                <label className="todo__status-label">
-                  <input
-                    data-cy="TodoStatus"
-                    type="checkbox"
-                    className="todo__status"
-                    checked={todo.completed}
-                    onChange={() => {
-                      toggleTodo(todo.id);
-                    }}
-                  />
-                </label>
-
-                {editingTodoId === todo.id ? (
-                  <form
-                    onSubmit={event => {
-                      event.preventDefault();
-                      handleSave(todo.id);
-                    }}
-                  >
-                    <input
-                      ref={editInputRef}
-                      autoFocus
-                      data-cy="TodoTitleField"
-                      type="text"
-                      className="todo__title-field"
-                      placeholder="Empty todo will be deleted"
-                      value={redact}
-                      onChange={event => {
-                        setRedact(event.target.value);
-                      }}
-                      onBlur={() => handleSave(todo.id)}
-                      onKeyUp={event => {
-                        if (event.key === 'Escape') {
-                          cancelEditing();
-                        }
-                      }}
-                    />
-                  </form>
-                ) : (
-                  <span
-                    data-cy="TodoTitle"
-                    className="todo__title"
-                    onDoubleClick={() => {
-                      setRedact(todo.title);
-                      setEditingTodoId(todo.id);
-                    }}
-                  >
-                    {todo.title}
-                  </span>
-                )}
-                {editingTodoId !== todo.id && (
-                  <button
-                    type="button"
-                    className="todo__remove"
-                    data-cy="TodoDelete"
-                    onClick={() => {
-                      deleteTodo(todo.id);
-                      inputRef.current?.focus();
-                    }}
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            ))}
-          </section>
-        )}
+        <TodoList
+          todos={visibleTodos[filter]}
+          toggleTodo={toggleTodo}
+          deleteTodo={deleteTodo}
+          editingTodoId={editingTodoId}
+          setEditingTodoId={setEditingTodoId}
+          redact={redact}
+          setRedact={setRedact}
+          editInputRef={editInputRef}
+          inputRef={inputRef}
+          handleSave={handleSave}
+          handleEditSubmit={handleEditSubmit}
+          cancelEditing={cancelEditing}
+        />
 
         {todos.length > 0 && (
-          <footer className="todoapp__footer" data-cy="Footer">
-            <span className="todo-count" data-cy="TodosCounter">
-              {todos.filter(todo => !todo.completed).length} items left
-            </span>
-
-            <nav className="filter" data-cy="Filter">
-              <a
-                href="#/"
-                className={`filter__link ${filter === 'all' ? 'selected' : ''}`}
-                data-cy="FilterLinkAll"
-                onClick={() => {
-                  setFilter('all');
-                }}
-              >
-                All
-              </a>
-
-              <a
-                href="#/active"
-                className={`filter__link ${filter === 'active' ? 'selected' : ''}`}
-                onClick={() => {
-                  setFilter('active');
-                }}
-                data-cy="FilterLinkActive"
-              >
-                Active
-              </a>
-
-              <a
-                href="#/completed"
-                className={`filter__link ${filter === 'completed' ? 'selected' : ''}`}
-                onClick={() => {
-                  setFilter('completed');
-                }}
-                data-cy="FilterLinkCompleted"
-              >
-                Completed
-              </a>
-            </nav>
-
-            <button
-              type="button"
-              className="todoapp__clear-completed"
-              data-cy="ClearCompletedButton"
-              disabled={todos.filter(todo => todo.completed).length === 0}
-              onClick={() => {
-                clearCompleted();
-                inputRef.current?.focus();
-              }}
-            >
-              Clear completed
-            </button>
-          </footer>
+          <TodoFooter
+            todosCount={todos.length}
+            completedCount={todos.filter(todo => todo.completed).length}
+            filter={filter}
+            setFilter={setFilter}
+            clearCompleted={clearCompleted}
+            inputRef={inputRef}
+          />
         )}
       </div>
     </div>
