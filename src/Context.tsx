@@ -73,7 +73,7 @@ export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const todo = {
-      id: `${title}  ${new Date()}`,
+      id: `${Date.now()}-${Math.random()}`,
       title: title.trim(),
       completed: false,
     };
